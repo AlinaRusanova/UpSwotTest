@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using System.Diagnostics;
 using UpSwot.Persistence.Models;
 using UpSwot.Persistence.Services.IServices;
 
@@ -17,7 +18,7 @@ namespace UpSwotTest.Controllers
         }
 
         [HttpGet("person", Name = nameof(GetPersonByName))]
-        [ResponseCache(Duration = 600)]
+        [ResponseCache(Duration = 600, VaryByQueryKeys = new[] { "name" })]
         public async Task<ActionResult<List<PersonDto>>> GetPersonByName([FromQuery]string name)
         {
             var response = await _personService.GetPersonByName(name);
@@ -32,12 +33,17 @@ namespace UpSwotTest.Controllers
         [ResponseCache(Duration = 600)]
         public async Task<ActionResult> CheckPerson(CheckPersonDto checkPersonDto)
         {
+
+            var sw = new Stopwatch();
+            sw.Start();
             var checkPerson = await GetPersonByName(checkPersonDto.PersonName);
 
-            if (checkPerson.Result == NotFound())
+            if (checkPerson.Result.ToString().Contains("NotFoundObjectResult"))
                 return checkPerson.Result;
 
             var result = await _episodeService.GetEpisodesByName(checkPersonDto);
+
+            sw.Stop();
 
             return Ok(result);
         }

@@ -1,7 +1,9 @@
 ﻿
+using UpSwot.Domain.Entitties.Addition;
+
 namespace UpSwot.Domain.Entitties
 {
-    public class CharacterOrigin
+    public class CharacterOrigin: Entity
     {
         public string Name { get; set; }
         public string Url { get; set; }

@@ -1,5 +1,4 @@
-﻿
-using System.Text.Json;
+﻿using System.Text.Json;
 
 namespace UpSwot.Domain.Repositories
 {
@@ -16,7 +15,7 @@ namespace UpSwot.Domain.Repositories
 
             string responseBody = await response.Content.ReadAsStringAsync();
 
-            var entityResponse = JsonSerializer.Deserialize<T>(responseBody, new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
+            var entityResponse = JsonSerializer.Deserialize<T>(responseBody, new JsonSerializerOptions() { PropertyNameCaseInsensitive = true  });
             return entityResponse;
         }
     }

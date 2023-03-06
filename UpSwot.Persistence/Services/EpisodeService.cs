@@ -1,4 +1,6 @@
-﻿using UpSwot.Domain.Entitties;
+﻿using System.Text;
+using System.Text.RegularExpressions;
+using UpSwot.Domain.Entitties;
 using UpSwot.Domain.Repositories;
 using UpSwot.Persistence.Exceptions;
 using UpSwot.Persistence.Models;
@@ -27,9 +29,9 @@ namespace UpSwot.Persistence.Services
               throw  new NotFoundException(checkPersonDto.EpisodeName,"Episode");
             }
 
-           var listWithCharacterNames = await FillCharactersData(choosenEpisode);
+            var listWithCharacterNames = await FillCharactersDataWithMultyURL(choosenEpisode);  //FillCharactersData(choosenEpisode);
 
-            if(listWithCharacterNames.ListOfCharactersName.Contains(checkPersonDto.PersonName))
+            if (listWithCharacterNames.ListOfCharactersName.Find(x => x.Contains(checkPersonDto.PersonName, StringComparison.OrdinalIgnoreCase)).Count() > 0)
                 return true;
 
             return false;
@@ -46,6 +48,30 @@ namespace UpSwot.Persistence.Services
                     choosenEpisode.ListOfCharactersName.Add(origin.Name);
                 }
             }
+            return choosenEpisode;
+        }
+
+        private async Task<Episodes> FillCharactersDataWithMultyURL(Episodes choosenEpisode)
+        {
+            var urlCharacter = "https://rickandmortyapi.com/api/character/{0}";
+
+            var pattern = "https://rickandmortyapi.com/api/character/";
+
+            var sb = new StringBuilder();
+
+            foreach (var item in choosenEpisode.Characters)
+            {
+                var id = Regex.Split(item, pattern)[1];
+                sb.Append(id + ",");
+            }
+
+            sb.Length = sb.Length - 1;
+            sb.ToString();
+
+            var listOfCharacters = await _repo.GetDataFromTheRickAndMortyApiResult<Character[]>(String.Format(urlCharacter,sb));
+
+            choosenEpisode.ListOfCharactersName = listOfCharacters.Select(n => n.Name).ToList();
+
             return choosenEpisode;
         }
     }
